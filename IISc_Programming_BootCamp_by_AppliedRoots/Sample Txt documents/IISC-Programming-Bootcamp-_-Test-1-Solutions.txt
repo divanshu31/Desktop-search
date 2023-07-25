@@ -1,0 +1,349 @@
+
+Test Link: https://www.hackerrank.com/contests/iisc-test-1/challenges
+
+
+
+
+1. ABC Substring [Easy]
+
+Problem statement:
+Given a string S made of lowercase letters a, b and c only. Find the number of sub strings which do not contain all three letters a, b and c, i.e. the number of sub strings that do not contain at least one of the letters a or b or c.
+
+Note: Sub string should contain at least one letter, that is, it should not be empty string.
+
+Input Format
+
+First line of the input is the number of test cases T. It is followed by T lines. Each test case is a single line which is the string S.
+
+Constraints
+
+1 <= |S| <= 10^6
+Output Format
+
+For each test case, print a single number, the required answer.
+
+Sample Input 0
+
+3
+ababa
+abc
+babac
+
+Sample Output 0
+
+15
+5
+12
+
+
+Solution:
+Approach 1:
+The idea is to use the sliding window approach for this problem where we maintain two pointers i and j which denotes the start and end indexes of the current substring being tracked following the given condition at the same time. We can maintain a hashmap to store the occurrences of the three characters in the current substring such that when the hashmap's size becomes 3, we add all of the substrings to our answer and try to reduce the substring size until the hashmap's size is no longer 3.
+
+C++ Code:
+#include<bits/stdc++.h>
+using namespace std;
+#define int int64_t  //signed integer of guaranteed 64 bits in C99
+const int M = 1e6 + 5;
+ 
+int32_t main()
+{    
+   
+    int t;        cin >> t; //input number of 
+    while(t--)
+    {
+        string s;        cin >> s;
+        int ans = 0, i = 0, j = 0;
+        // main logic
+        map <char, int> mp;
+
+        for(j = 0; j < (unsigned)s.size(); j++)
+        {
+            mp[s[j]]++;
+            while(mp.size() == 3 && i < j)
+            {
+                ans += j - i;
+                mp[s[i]]--;
+                if(mp[s[i]] == 0)
+                    mp.erase(s[i]);
+                i++;
+            }
+        }
+        while(i < j)
+        {
+            ans += j - i;
+            i++;
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
+
+
+
+Approach 2: The idea is to use three variables a_index, b_index and c_index to store the latest occurrence of the characters a, b and c and another variable ans to store the number of substrings that don't have at least one of a, b or c and initialize its value to the total number of substrings with length n i.e, n*(n+1)/2, where n is the length of the string.
+
+
+
+Now simply traverse the string from the beginning. At each point update the value of variables to the latest value whenever encountered.Since we are indexing with 0, so we are updating the index as i+1 at each step.
+
+Also at each step, you need to find the index of minimum occurrence of the remaining of the two characters not encountered in the current step.
+
+Then simply deduct this index from the variable ans. This is because once you found the index of the minimum of the remaining characters you are sure that any more substrings formed by moving downwards in index will also contain all the three characters.
+
+Hence the total numbers of all such substrings(ones containing all a, b, and c) formed at this step is the found index.
+
+
+
+def CountSubString(Str, n): 
+  
+    # Variable ans to store all the possible subStrings 
+    # Initialize its value as total number of subStrings 
+    # that can be formed from the given String 
+    ans = (n * (n + 1)) // 2
+  
+    # Stores recent index of the characters 
+    a_index = 0
+    b_index = 0
+    c_index = 0
+  
+    for i in range(n): 
+  
+        # If character is a update a's index 
+        # and the variable ans 
+        if (Str[i] == 'a'): 
+            a_index = i + 1
+            ans -= min(b_index, c_index) 
+  
+        # If character is b update b's index 
+        # and the variable ans 
+        elif (Str[i] == 'b'): 
+            b_index = i + 1
+            ans -= min(a_index, c_index) 
+          
+        # If character is c update c's index 
+        # and the variable ans 
+        else: 
+            c_index = i + 1
+            ans -= min(a_index, b_index) 
+  
+    return ans 
+
+
+
+
+2. Paint the Boxes 1
+Problem statement
+There are N boxes arranged in a row. Each box is initially painted either red (R) or green (G). In one operation, you are allowed to change the color of any one box by painting it either red or green. What is the maximum length of a consecutive sequence of boxes painted with the same color if you can perform at most K (possibly zero) operations?
+
+Input Format
+
+The first line of input contains an integer N denoting the number of boxes in the row. The second line of input contains an integer K denoting the maximum number of operations being allowed. The third line of input contains a string, consisting of uppercase characters 'R' and 'G' only, denoting the color of each box initially.
+
+Constraints
+
+1 <= K <= N <= 100
+S[i] = {'G', 'R'}
+Output Format
+
+Determine the maximum length of consecutive sequence of same color boxes by performing at most K operations.
+
+Sample Input 0
+
+7
+1
+RRRGGRG
+Sample Output 0
+
+4
+Explanation 0
+
+We can replace first 'G' with 'R' to create a sequence RRRRGRG. Another possible solution is to replace last 'R' with 'G' to create a sequence RRRGGGG. Both solutions yield maximum length of consecutive sequence of same color boxes as 4.
+
+Sample Input 1
+
+6
+2
+RGRGGR
+Sample Output 1
+
+5
+Explanation 1
+
+We can replace the first two 'R' s with 'G' to create a sequence like this GGGGGR.
+
+
+Solution:
+Sliding Window Approach: We try to make the longest consecutive sequence for both red color boxes and green color boxes. Iterate over the string and keep a counter which denotes the number of times we have applied the operation, i.e. changing the box color. Also, keep two variables start and end to denote the current window containing consecutive same colored boxes. When our counter becomes greater than K, we try to decrease the size of the window by incrementing start until our counter becomes less than or equal to K. Update the answer every time as well.
+
+C++ Code:
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+const int M = 1e6 + 5;
+ 
+int count(int n, int k, string s, char ch)
+{
+    int ans = 0, j = 0, cnt = 0;
+    for(int i = 0; i < n; i++)
+    {
+        cnt += (s[i] != ch);
+        while(j <= i && cnt > k)
+        {
+            cnt -= (s[j] != ch);
+            j++;
+        }
+        ans = max(ans, i - j + 1);
+    }
+    return ans;
+}
+
+int maximum_length(int n, int k, string s)
+{
+    int ans = count(n, k, s, 'R');
+    ans = max(ans, count(n, k, s, 'G'));
+    return ans;
+}
+ 
+int32_t main() 
+{
+    int n, k;
+    string s;
+    cin >> n >> k >> s;
+    cout << maximum_length(n, k, s);
+        return 0;
+}
+
+
+3. MAXIMUM ATTACHMENT
+Problem statement:
+There are N employees in a company. Each employee is characterized by the number of projects he has done and the attachment factor in respect to his boss. The boss doesn't want any employee to feel less hard-working compared to somebody else in the company. An employee feels less hard-working if in the company there is someone who has done at least k projects more than he does. Also, the boss wants the total attachment factor of the employees of the company to be maximum. Determine the maximum total attachment factor attainable.
+
+Input Format
+
+The first line of input contains the number of test cases T. For each test case, the first line of input contains two integers, N and k - the number of employees working in the company and the minimum difference between the number of projects in order to feel less hard-working respectively. Next N lines contain the description of all employees, ith line contains the description of the ith employee of type pi, ai - the number of projects he has done and the attachment factor, respectively.
+
+Constraints
+
+1 = T = 10
+1 = N = 10^5
+1 = k = 10^5
+1 = pi, ai = 10^9
+Output Format
+
+Output the maximum total attachment factor that can be attained.
+
+Sample Input 0
+
+2
+5 1
+5 9
+2 10
+9 5
+3 12
+1 1
+5 6
+5 11
+10 11
+11 11
+12 11
+100 1
+Sample Output 0
+
+12
+33
+
+Explanation 0
+
+For first test case, since the minimum difference in order to feel less intelligent is 1, a geek feels less intelligent if there is any other geek who has solved atleast 1 problem more than he does. Thus, maximum attachment factor is attained from the fourth geek who has solved 3 problems.
+
+For second test case, maximum attachment factor is attained from 2nd, 3rd and 4th geek who has solved 10, 11 and 12 problems respectively where no geek feels less intelligent (since the minimum difference is 6).
+
+Solution:
+Approach:
+Sort all the employees according to the number of projects solved in ascending order. Now, the answer is some contiguous subsegment which satisfies the condition of a employee not being felt less hard working by another employee and which also maximises the total attachment factor with respect to their boss.
+
+ There are two methods to find the required subsegment: 
+1. Two pointer method. 
+2. Perform binary search on the array of number of projects solved to get the optimal index for which employee[i] does not feel less hard working compared to anyone in that subsegment. After that, use the concept of Prefix Sum arrays to find the required answer i.e. attachment factor of that optimal subsegment.
+
+C++ Code:
+
+#include<bits/stdc++.h>
+using namespace std;
+#define int int64_t
+const int M = 1e5 + 5;
+
+int32_t main()
+{   
+    int t;      cin >> t;
+    while(t--)
+    {
+        int n, k;            
+        cin >> n >> k;
+        vector <pair <int, int> > V;
+        for(int i = 0; i < n; i++)
+        {
+            int a, b;     
+        cin >> a >> b;
+            V.push_back({a, b});
+        }
+        sort(V.begin(), V.end());
+        int factor[n], solved[n];
+      
+        for(int i = 0; i < n; i++)   
+          solved[i] = V[i].first;
+        
+        //prefix sum
+        factor[0] = V[0].second;
+        for(int i = 1; i < n; i++)
+            factor[i] = factor[i - 1] + V[i].second;
+
+        int total_attachment = 0;
+        for(int i = 0; i < n; i++)
+        {
+            int idx = upper_bound(solved, solved + n, solved[i] + k - 1) - solved; 
+            total_attachment = max(total_attachment, (factor[idx - 1] - (i ? factor[i - 1] : 0)));
+        }
+        cout << total_attachment << endl;
+    }
+    return 0;
+}
+
+	Upper bound: 
+upper_bound() is a standard library function in C++ defined in the header . It returns an iterator pointing to the first element in the range [first, last) that is greater than value, or last if no such element is found. The elements in the range shall already be sorted or at least partitioned with respect to val.
+
+Input : 10 20 30 30 40 50
+Output : upper_bound for element 30 is at index 4
+
+Example:
+int main() 
+{ 
+    int arr[] = { 10, 20, 30, 40, 50 }; 
+  
+    // Print elements of array 
+    cout << "Array contains :"; 
+    for (int i = 0; i < 5; i++) 
+        cout << " " << arr[i]; 
+    cout << "\n"; 
+  
+    // using upper_bound 
+    int upper1 = upper_bound(arr, arr+5, 35) - arr; 
+    int upper2 = upper_bound(arr, arr+5, 45) - arr; 
+  
+    cout << "\nupper_bound for element 35 is at position : " 
+              << (upper1); 
+    cout << "\nupper_bound for element 45 is at position : "
+              << (upper2); 
+  
+    return 0; 
+} 
+Array contains : 10 20 30 40 50
+upper_bound for element 35 is at position : 3
+upper_bound for element 45 is at position : 4
+
+
+
+
+
+

@@ -1,0 +1,317 @@
+Test Link: https://www.hackerrank.com/contests/iisc-3/challenge
+
+
+INDEXED SEQUENCE
+
+A mentor while teaching his students described an algorithm of generating an indexed sequence to all the students. Initially, the sequence contains only one element equal to 1. Now, there are (K - 1) steps to be performed on that sequence. In each step, current sequence is taken as a whole and appended to itself (formed on previous step) and a minimum number (which is not used before) is inserted in the middle of that sequence. Determine the value of element at Pth index (1-based indexing) in that sequence after (K - 1) steps.
+
+Input Format
+
+The first line of input contains the number of test cases T. Every test case consists of two positive integers N and P.
+
+Constraints
+
+1 = T = 10
+1 = K = 50
+1 = P = 2^(K - 1)
+Output Format
+
+For each test case, output the Pth element of the sequence after (K - 1) steps.
+
+Sample Input 0
+
+1
+4 6
+Sample Output 0
+
+2
+
+Explanation 0
+
+Initially the sequence contains only one element at first step [1]. Now we have to perform 3 (4 - 1) steps. At second step, sequence will be [1, 2, 1] (1 is appended to 1 and minimum number which is not used before i.e. 2 is inserted in the middle). Similarly, at third step, sequence will be [1, 2, 1, 3, 1, 2, 1]. At fourth step, final sequence will be [1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1].
+
+Approach:
+
+Apply simple binary search.
+
+
+C++ Code:
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int int64_t
+
+signed main()
+{
+    ios_base::sync_with_stdio(0);   cin.tie(0);     cout.tie(0);
+    int t;      cin >> t;
+    while(t--)
+    {
+        int K, P;       cin >> K >> P;
+        if(P & 1)       {   cout << 1 << "\n";  continue;   }
+        int curr = K;
+        int start = 1, end = pow(2, K);
+        while(start <= end)
+        {
+            int mid = (start + end) >> 1;
+            if(mid == P)    {   cout << curr << "\n";   break;  }
+            else if(P < mid)
+            {
+                end = mid - 1;
+                curr--;
+            }
+            else
+            {
+                start = mid + 1;
+                curr--;
+            }
+        }
+    }
+    return 0;
+}
+	
+War Begins
+
+Its war time and the Warriors are busy fighting. Each Warrior has Ci coins with him but weapons are really expensive, so they need money to buy few weapons for themselves. One night all the warriors hold a meeting to decide their further plan of action. But the warriors had a dispute and every warrior decided to kill atmost K warriors. For every warrior A, for each warrior B he kills, he will get all the coins that B posessed. Obviously, A would be able to kill B, only if A has a power strictly greater than the power of B. Given a group of N warriors, the coins every Warrior posesses, the Power each one has. Find the maximum number of coins he would have, if he kills exactly K warriors of the group.
+
+Input Format
+
+The first line of input conains number of testcases T. The 1st line of each testcase, contains two integers N and K, denoting the number of warriors and the maximum number of warriors each warrior is allowed to kill, respectively. The 2ndline of each testcase, contains N space separated integers P1,P2 ..., Pn - Powers of the Warriors. All Pi are distinct.
+
+The 3rd line of each testcase, contains N space separated integers C1, C2 ..., Cn - the number of coins each warrior has.
+
+Constraints
+
+1 <= T <= 100
+1 <= N <= 10^5
+0 <= k <= min(N - 1, 10)
+1 <= Pi <= 10^9
+1 <= Ci <= 10^9
+Output Format
+
+For each testcase you need to print a single line containing n space separated integers - the maximum number of coins each warrior can have if he kill atmost K other warriors
+
+Sample Input 0
+
+1
+4 2
+4 5 6 7
+2 3 4 5
+Sample Output 0
+
+2 5 9 12
+Explanation 0
+
+The 1st warrior, has power of 4, he has the least power thus cannot kill anyone, thus he is left with the same number of coins that he initially had. The 2nd warrior, having power of 5units, can kill the 1st warrior (as 4 < 5), thus the maximum coins he has at the end = Coins he originally had + Coins of 1st warrior = 3 + 2 = 5 The 3rd warrior, having power of 6 units, can kill both the 1st and 2nd warriors, and get a maximum of 9(2 + 3 + 4) coins at the end. The 4th warrior can kill warrior 1, warrior 2 and warrior 3. But he can kill atmost K ie 2 warriors thus he kills warriors 2 and 3, to get maximum coins i.e 12 (3 + 4 + 5) coins at the end
+
+Approach:
+
+Every warrior can only kill warrior with power less than his. Thus, we can pair each warrior's power with its current coins and then sort the paired array according to the power. Now, iterating over the array, we know that current indexed warrior is able to kill all of the previously indexed warriors. But, since every warrior has a limit to kill only K warriors and we need to maximize its number of coins, we can use a min heap here. We keep a variable total denoting the amount of coins upto current indexed warrior and keep on inserting the current warrior's possessed coins into the heap. When the heap size becomes greater than K, we try to discard minimum possessed coins warrior being killed from current warrior in order to maximize its coins value and be in limits. For this, we can simply subtract the top element from the heap (i.e. minimum element) from our total value.
+
+C++ program:
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int int64_t
+
+signed main()
+{
+    ios_base::sync_with_stdio(false);   cin.tie(0);     cout.tie(0);
+    int t;      cin >> t;
+    while(t--)
+    {
+        int n, k;       cin >> n >> k;
+        vector <int> V1(n), V2(n), ans(n);
+        for(int i = 0; i < n; i++)      cin >> V1[i];
+        for(int i = 0; i < n; i++)      cin >> V2[i];
+        vector <pair <pair <int, int>, int> > V;
+        for(int i = 0; i < n; i++)
+            V.push_back({{V1[i], V2[i]}, i});
+        sort(V.begin(), V.end());
+        int total = 0;
+        priority_queue <int, vector <int> , greater<long long> > pq;
+        for(int i = 0; i < n; i++)
+        {
+            ans[V[i].second] = total;
+            total += V[i].first.second;
+            pq.push(V[i].first.second);
+            while(pq.size() > k)
+            {
+                total -= pq.top();
+                pq.pop();
+            }
+        }
+        for(int i = 0; i < n; i++)      cout << (ans[i] + V2[i] )<< " ";
+        cout << endl;
+    }
+    return 0;
+}
+
+Bananas Shipment
+
+There is a warehouse of bananas which contains N number of boxes containing bananas. Each box has some weight BoxWt[i]. All the boxes are needed to be transported to a city using M number of trucks. Each truck has some maximum capacity TruckCap[i] it can carry. It takes 1 hour for a truck to transport a box from warehouse to the city and 1 hour to return from city to warehouse. Also, each truck can carry atmost 1 box at a time provided box weight should be less than or equal to truck capacity.
+
+Determine the minimum time in which all the N boxes can be shipped to the city.
+
+Note: A solution will always exist, i.e. there will be atleast one truck that can carry all the boxes one at a time.
+
+Input Format
+
+The first line contains 2 integers N and M. The next line contains N integers denoting the weight of each banana box. The next line contains M integers denoting the maximum capacity of each truck.
+
+Constraints
+
+1 <= N, M <= 10^4
+1 <= BoxWt[i], TruckCap[i] <= 10^6
+Output Format
+
+Print the required answer.
+
+Sample Input 0
+
+7 2
+10 2 16 19 6 11 5
+29 25
+Sample Output 0
+
+7
+Explanation 0
+
+One of the possible solution is that 1st truck carries 1st box and 2nd truck carries 2nd box and both of them return back. Now, 1st truck will carry 3rd box and 2nd truck will carry 4th box and both of them return back. Again, 1st truck will carry 5th box and 2nd truck will carry 6th box and one of them return back to carry the last box. So the total time required will be 2 + 2 + 2 + 1 = 7.
+
+Approach:
+
+1. Calculating the minimum amount of time for this problem would be a monotonic function, thus we can apply binary search on the answer. We check if for the current mid (i.e. current time), all the available trucks can deliver all the boxes within time, then we try to decrease our answer by setting higher limit to mid - 1, otherwise increase the time. We need to write a function which checks for us whether the answer is possible or not. 
+2. Here we need to follow a greedy approach for an optimal answer where we first try to assign a truck with smaller capacity to deliver boxes with less weight which helps other trucks with larger capacity to deliver boxes with more weight and save time. Hence, we sort both the trucks and boxes array and starting with first truck we assign all the boxes to it having lesss than or equal to truck's capacity until it has time left. Otherwise, move on to the next truck. At last, we just need to check all the boxes have been delivered or not.
+
+
+C++ Code:
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int int64_t
+const int M = 1e4 + 5;
+int n, m, box[M], truck[M];
+ 
+int OK(int k)
+{
+    int t = 1, b = 1;
+    while(t <= m)
+    {
+        int time = 0;
+        while(b <= n && truck[t] >= box[b] && time < k)
+        {
+            time += 2;
+            b++;
+        }
+        t++;
+    }
+    return b == (n + 1);
+}
+ 
+int32_t main()
+{    
+    #ifndef ONLINE_JUDGE
+        freopen("in.txt", "r", stdin);
+        freopen("out.txt", "w", stdout);
+    #endif
+    ios_base::sync_with_stdio(0);   cin.tie(0);     cout.tie(0);
+    cin >> n >> m;
+    for(int i = 1; i <= n; i++)    cin >> box[i];
+    for(int i = 1; i <= m; i++)    cin >> truck[i];
+    sort(box + 1, box + n + 1);
+    sort(truck + 1, truck + m + 1);
+    int start = 1, end = 1e18, ans = 0;
+    while(start <= end)
+    {
+        int mid = (start + end) >> 1;
+        if(OK(mid))
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else    start = mid + 1;
+    }
+    cout << ans;
+    return 0; 
+}
+
+
+
+Pairing Problem:
+
+Given an array A of N integers and an integer K. For each pair (i, j) in the given array where 1 <= i < j <= N, find the value of |A[i] - A[j]| and store it in another array B. Now after storing all the possible pairs sort this B array and print the Kth number in that array (1 - based indexing). Note: |X| denotes the absolute value of X.
+
+Input Format
+
+The first line contains 2 space separated integers N and K respectively. The next line contains N space separated integers, where the ith integer denotes A[i].
+
+Constraints
+
+2 <= N <= 200000
+1 <= A[i] <= 10^9
+1 <= K <= (N * (N - 1))/2
+Output Format
+
+Print the required answer.
+
+Sample Input 0
+
+5 4
+1 7 9 4 5    
+Sample Output 0
+
+3
+Explanation 0
+
+The new sorted array B after storing all required values is [1, 2, 2, 3, 3, 4, 4, 5, 6, 8]
+
+Approach:
+Sort the array and do binary search on the answer and by using the check(x) function find the count of pairs in the array whose absolute difference is less than or equal to x. This can be done by applying another binary search on the every A[i] to find the count of numbers less than or equal to A[i] + x and then calculating the required number of pairs.
+
+C++ Program
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+const int M = 2e5 + 5;
+int n, k, a[M], pre[M];
+ 
+int count(int x)
+{
+    int cnt = 0;
+    for(int i = 1; i <= n; i++)
+    {
+        int idx = upper_bound(a + 1, a + n + 1, a[i] + x) - a;
+        cnt += (idx - i - 1);
+    }
+    return cnt;
+}
+ 
+int32_t main()
+{    
+    ios_base::sync_with_stdio(0);   cin.tie(0);     cout.tie(0);    
+    cin >> n >> k;
+    for(int i = 1; i <= n; i++)    cin >> a[i];    
+    sort(a + 1, a + n + 1);
+    int start = 0, end = 1e9, ans = -1;
+    while(start <= end)
+    {
+        int mid = (start + end) >> 1;
+        if(count(mid) >= k)
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else    start = mid + 1;
+    }
+    cout << ans;
+    return 0; 
+}
+
+
+upper_bound() is a standard library function in C++ defined in the header . It returns an iterator pointing to the first element in the range [first, last) that is greater than value, or last if no such element is found. The elements in the range shall already be sorted or at least partitioned with respect to val.
+
+Input : 10 20 30 30 40 50
+Output : upper_bound for element 30 is at index 4
+
